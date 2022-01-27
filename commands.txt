@@ -1,0 +1,89 @@
+df.describe()
+df["Seller_Type"].unique()
+df["Fuel_Type"].unique()
+df["Transmission"].unique()
+
+df.describe()
+df.isnull().sum()
+
+df = df.drop(columns = ["Car_Name"])
+df["current year"] = 2021
+
+df["No of years"] = df["current year"] - df["Year"]
+
+df = df.drop(columns = "Year")
+data_set = pd.get_dummies(data_set,drop_first=True)  ##  to convert categorical data into numeric data
+
+import seaborn as sns
+g = sns.heatmap(data_set[top_corr_feature].corr(),annot=True,cmap = "RdYlGn")
+
+import matplotlib.pyplot as plt
+%matplotlib inline
+cormat =  data_set.corr()
+top_corr_feature  = cormat.index
+plt.figure(figsize=(20,20))
+
+g = sns.heatmap(data_set[top_corr_feature].corr(),annot=True,cmap = "RdYlGn")
+
+x = data_set.drop(columns = "Selling_Price")
+y = data_set.Selling_Price
+
+
+
+### feature importance and visualization
+
+from sklearn.ensemble import ExtraTreesRegressor
+model = ExtraTreesRegressor()
+model.fit(x,y)
+feature_importance = pd.Series(model.feature_importances_,index=x.columns)
+feature_importance.nlargest(5).plot(kind='barh')
+plt.show()
+
+#######################when we user random forest we doesnot requrie scalling############
+
+ #Randomized Search CV
+
+# Number of trees in random forest
+n_estimators = [int(x) for x in np.linspace(start = 100, stop = 1200, num = 12)]
+# Number of features to consider at every split
+max_features = ['auto', 'sqrt']
+# Maximum number of levels in tree
+max_depth = [int(x) for x in np.linspace(5, 30, num = 6)]
+# max_depth.append(None)
+# Minimum number of samples required to split a node
+min_samples_split = [2, 5, 10, 15, 100]
+# Minimum number of samples required at each leaf node
+min_samples_leaf = [1, 2, 5, 10]
+
+random_grid = {"n_estimators":n_estimators,
+               "max_depth":max_depth,
+               "max_features":max_features,
+               "min_samples_split":min_samples_split,
+               "min_samples_leaf":min_samples_leaf
+        
+              
+              
+              }
+
+from sklearn.model_selection import RandomizedSearchCV
+rf = RandomForestRegressor()
+rf_grid = RandomizedSearchCV(estimator=rf, param_distributions=random_grid,n_iter=10,scoring='neg_mean_squared_error',cv =5, verbose=2,n_jobs=1)
+
+rf_grid.fit(x_tranin,y_train)
+
+sns.distplot(y_test-predictions)
+
+import pickle
+file = open("model_randomforest.pkl", 'wb')
+pickle.dump(rf_grid,file)
+
+
+##################how to create requirement.txt file##############
+
+
+
+
+
+
+
+
